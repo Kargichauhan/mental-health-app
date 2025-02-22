@@ -1,8 +1,8 @@
 import streamlit as st
 import openai
 
-# 🔹 Set your OpenAI API Key
-OPENAI_API_KEY = "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"  # Replace with your actual API key
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)  # 🔹 Create OpenAI client
 
