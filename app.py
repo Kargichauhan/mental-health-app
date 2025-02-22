@@ -1,19 +1,35 @@
 import streamlit as st
 import openai
 
+# Check if API key exists in Streamlit secrets
+if "OPENAI_API_KEY" not in st.secrets:
+    st.error("OpenAI API Key is missing. Please add it to Streamlit Secrets.")
+    st.stop()
 
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"] 
+# Retrieve API Key
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 
-openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)  # 🔹 Create OpenAI client
+# Check if the API key is empty
+if not OPENAI_API_KEY:
+    st.error("OpenAI API Key is empty. Ensure it's set correctly in Streamlit Secrets.")
+    st.stop()
 
-st.title(" AI Mental Health Counselor")
-st.write("Enter issue, and I will generate guidance :) ")
+# Initialize OpenAI Client with error handling
+try:
+    openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)
+except Exception as e:
+    st.error(f"Failed to initialize OpenAI client: {e}")
+    st.stop()
+
+# Streamlit UI
+st.title("AI Mental Health Counselor")
+st.write("Enter your issue, and I will generate guidance.")
 
 user_input = st.text_area("Describe your issue:", "")
 
-if st.button("Legacy Advice: "):
-    if user_input:
-        with st.spinner("Loading response..till then give a smile."):
+if st.button("Get Advice"):
+    if user_input.strip():  # Ensures input is not empty
+        with st.spinner("Loading response..till then give a smile :)"):
             try:
                 response = openai_client.chat.completions.create(
                     model="gpt-3.5-turbo",
@@ -26,10 +42,12 @@ if st.button("Legacy Advice: "):
                     ]
                 )
 
-                st.subheader("Legacy Advices:")
+                st.subheader("Advice:")
                 st.write(response.choices[0].message.content)
 
+            except openai.OpenAIError as e:
+                st.error(f"OpenAI API Error: {e}")
             except Exception as e:
-                st.error(f"Error: {e}")
+                st.error(f"Unexpected Error: {e}")
     else:
-        st.warning("⚠️ Please enter a description.")
+        st.warning("Please enter a description before submitting.")
